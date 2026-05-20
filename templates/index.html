@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Sports Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #030508;
+    --bg-panel: #080d14;
+    --bg-card: #0c1420;
+    --bg-card2: #0f1a28;
+    --accent-red: #e8192c;
+    --accent-cyan: #00d4ff;
+    --accent-gold: #ffc107;
+    --accent-green: #00ff88;
+    --accent-purple: #a855f7;
+    --border: rgba(0,212,255,0.15);
+    --border-red: rgba(232,25,44,0.4);
+    --text-primary: #e8f4fc;
+    --text-secondary: #7a9bb5;
+    --text-dim: #3a5570;
+    --glow-red: 0 0 20px rgba(232,25,44,0.4);
+    --glow-cyan: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ===== LAYOUT ===== */
+  .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width:220px;
+    background: linear-gradient(180deg, #090f1a 0%, #060c15 100%);
+    border-right: 1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    position:fixed;
+    top:0; left:0; bottom:0;
+    z-index:100;
+    overflow:hidden;
+  }
+  .sidebar::after {
+    content:'';
+    position:absolute;
+    top:0; right:0;
+    width:1px; height:100%;
+    background: linear-gradient(180deg, transparent, var(--accent-cyan), transparent);
+    opacity:0.4;
+  }
+
+  .logo-area {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width:52px; height:52px;
+    background: linear-gradient(135deg, var(--accent-red), #ff6b35);
+    clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:10px;
+    box-shadow: var(--glow-red);
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+  @keyframes pulse-logo {
+    0%,100%{ box-shadow: var(--glow-red); }
+    50%{ box-shadow: 0 0 30px rgba(232,25,44,0.7); }
+  }
+  .logo-icon svg { width:28px; height:28px; fill:white; }
+  .logo-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:13px; font-weight:900;
+    color: var(--accent-red);
+    letter-spacing:2px;
+    line-height:1.2;
+  }
+  .logo-sub {
+    font-size:9px;
+    color: var(--accent-cyan);
+    letter-spacing:3px;
+    opacity:0.8;
+  }
+
+  .nav-section { padding:16px 12px 8px; }
+  .nav-label {
+    font-size:9px;
+    color: var(--text-dim);
+    letter-spacing:3px;
+    font-family:'Share Tech Mono',monospace;
+    padding: 0 8px;
+    margin-bottom:8px;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:1px;
+    position:relative;
+    margin-bottom:2px;
+  }
+  .nav-item:hover { background:rgba(0,212,255,0.08); color:var(--text-primary); }
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(232,25,44,0.2), rgba(232,25,44,0.05));
+    color: #fff;
+    border-left:3px solid var(--accent-red);
+  }
+  .nav-item.active::after {
+    content:'';
+    position:absolute;
+    right:8px; top:50%; transform:translateY(-50%);
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--accent-red);
+    box-shadow:0 0 8px var(--accent-red);
+  }
+  .nav-icon { width:18px; height:18px; flex-shrink:0; }
+
+  .champions-box {
+    margin:12px;
+    background: linear-gradient(135deg, rgba(232,25,44,0.1), rgba(255,193,7,0.05));
+    border:1px solid rgba(232,25,44,0.2);
+    border-radius:10px;
+    padding:16px;
+    text-align:center;
+  }
+  .trophy-icon { font-size:36px; margin-bottom:8px; animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  .champ-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:11px;
+    color:var(--accent-gold);
+    letter-spacing:2px;
+    margin-bottom:8px;
+  }
+  .champ-quote {
+    font-size:10px;
+    color:var(--text-secondary);
+    font-style:italic;
+    line-height:1.5;
+  }
+
+  /* ===== MAIN ===== */
+  .main { margin-left:220px; flex:1; display:flex; flex-direction:column; }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    background: rgba(8,13,20,0.95);
+    border-bottom:1px solid var(--border);
+    padding:0 32px;
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(10px);
+  }
+  .topbar-left { display:flex; align-items:center; gap:16px; }
+  .page-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    color:var(--text-primary);
+    letter-spacing:2px;
+  }
+  .breadcrumb {
+    font-size:11px;
+    color:var(--text-dim);
+    font-family:'Share Tech Mono',monospace;
+  }
+  .topbar-right { display:flex; align-items:center; gap:20px; }
+  .topbar-clock {
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px;
+    color:var(--accent-cyan);
+    background:rgba(0,212,255,0.05);
+    border:1px solid rgba(0,212,255,0.2);
+    padding:6px 14px;
+    border-radius:4px;
+    letter-spacing:1px;
+  }
+  .status-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent-green);
+    box-shadow:0 0 8px var(--accent-green);
+    animation:blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ===== CONTENT ===== */
+  .content { padding:28px 32px; flex:1; }
+
+  /* Hero Banner */
+  .hero-banner {
+    background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 40%, #0a1020 100%);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:28px 36px;
+    margin-bottom:28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-banner::before {
+    content:'';
+    position:absolute;
+    top:-50%; right:-10%;
+    width:400px; height:400px;
+    background: radial-gradient(circle, rgba(232,25,44,0.12) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-banner::after {
+    content:'';
+    position:absolute;
+    bottom:-30%; left:30%;
+    width:300px; height:300px;
+    background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:32px;
+    font-weight:900;
+    background: linear-gradient(135deg, #fff 0%, #e8f4fc 50%, var(--accent-cyan) 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    margin-bottom:4px;
+    position:relative; z-index:1;
+  }
+  .hero-sub {
+    font-family:'Orbitron',sans-serif;
+    font-size:14px;
+    color:var(--accent-red);
+    letter-spacing:4px;
+    margin-bottom:12px;
+    position:relative; z-index:1;
+  }
+  .hero-desc {
+    color:var(--text-secondary);
+    font-size:14px;
+    position:relative; z-index:1;
+  }
+
+  /* ===== STAT CARDS ===== */
+  .stats-grid {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:16px;
+    margin-bottom:28px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+    cursor:pointer;
+    transition:all 0.3s;
+  }
+  .stat-card:hover { transform:translateY(-3px); }
+  .stat-card::before {
+    content:'';
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:2px;
+  }
+  .stat-card.red::before { background:var(--accent-red); box-shadow:var(--glow-red); }
+  .stat-card.cyan::before { background:var(--accent-cyan); box-shadow:var(--glow-cyan); }
+  .stat-card.gold::before { background:var(--accent-gold); }
+  .stat-card.green::before { background:var(--accent-green); }
+  .stat-card.purple::before { background:var(--accent-purple); }
+  .stat-icon { font-size:28px; margin-bottom:10px; }
+  .stat-num {
+    font-family:'Orbitron',sans-serif;
+    font-size:28px;
+    font-weight:900;
+    margin-bottom:4px;
+  }
+  .stat-card.red .stat-num { color:var(--accent-red); }
+  .stat-card.cyan .stat-num { color:var(--accent-cyan); }
+  .stat-card.gold .stat-num { color:var(--accent-gold); }
+  .stat-card.green .stat-num { color:var(--accent-green); }
+  .stat-card.purple .stat-num { color:var(--accent-purple); }
+  .stat-label {
+    font-size:10px;
+    color:var(--text-dim);
+    letter-spacing:2px;
+    font-family:'Share Tech Mono',monospace;
+  }
+
+  /* ===== TABS ===== */
+  .tab-bar {
+    display:flex;
+    gap:4px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:24px;
+  }
+  .tab-btn {
+    padding:12px 24px;
+    background:transparent;
+    border:none;
+    color:var(--text-secondary);
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2px;
+    cursor:pointer;
+    position:relative;
+    transition:all 0.2s;
+  }
+  .tab-btn:hover { color:var(--text-primary); }
+  .tab-btn.active {
+    color:#fff;
+    background:rgba(232,25,44,0.1);
+    border-radius:6px 6px 0 0;
+  }
+  .tab-btn.active::after {
+    content:'';
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:2px;
+    background:var(--accent-red);
+    box-shadow:var(--glow-red);
+  }
+
+  /* ===== SECTION LAYOUT ===== */
+  .section-grid { display:grid; grid-template-columns:340px 1fr; gap:20px; }
+
+  /* ===== FORM PANEL ===== */
+  .form-panel {
+    background: var(--bg-card);
+    border:1px solid var(--border-red);
+    border-radius:12px;
+    padding:24px;
+  }
+  .panel-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-red);
+    letter-spacing:2px;
+    margin-bottom:20px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel-title-icon { font-size:16px; }
+  .form-group { margin-bottom:16px; }
+  .form-label {
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--text-secondary);
+    letter-spacing:2px;
+    margin-bottom:8px;
+    font-family:'Share Tech Mono',monospace;
+  }
+  .form-label .req { color:var(--accent-red); }
+  .form-input {
+    width:100%;
+    background: rgba(0,0,0,0.4);
+    border:1px solid rgba(0,212,255,0.15);
+    border-radius:6px;
+    padding:10px 14px;
+    color:var(--text-primary);
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    outline:none;
+    transition:all 0.2s;
+  }
+  .form-input:focus {
+    border-color:rgba(0,212,255,0.5);
+    box-shadow:0 0 0 2px rgba(0,212,255,0.1);
+    background:rgba(0,212,255,0.03);
+  }
+  .form-input::placeholder { color:var(--text-dim); }
+  select.form-input option { background:#0c1420; }
+
+  .btn-primary {
+    width:100%;
+    padding:12px;
+    background: linear-gradient(90deg, var(--accent-red), #c41020);
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    font-family:'Orbitron',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:2px;
+    cursor:pointer;
+    transition:all 0.3s;
+    margin-top:8px;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(90deg, #ff1f36, var(--accent-red));
+    box-shadow: var(--glow-red);
+    transform:translateY(-1px);
+  }
+
+  /* ===== TABLE PANEL ===== */
+  .table-panel {
+    background: var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:24px;
+  }
+  .table-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .table-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-cyan);
+    letter-spacing:2px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .search-bar {
+    display:flex; gap:8px;
+  }
+  .search-input {
+    background:rgba(0,0,0,0.4);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:7px 14px;
+    color:var(--text-primary);
+    font-family:'Rajdhani',sans-serif;
+    font-size:12px;
+    outline:none;
+    width:200px;
+    transition:all 0.2s;
+  }
+  .search-input:focus { border-color:rgba(0,212,255,0.4); }
+  .search-input::placeholder { color:var(--text-dim); }
+
+  .data-table { width:100%; border-collapse:collapse; }
+  .data-table th {
+    text-align:left;
+    padding:10px 14px;
+    font-size:10px;
+    font-family:'Share Tech Mono',monospace;
+    color:var(--text-dim);
+    letter-spacing:2px;
+    border-bottom:1px solid var(--border);
+    font-weight:400;
+    white-space:nowrap;
+  }
+  .data-table td {
+    padding:11px 14px;
+    font-size:13px;
+    font-weight:500;
+    border-bottom:1px solid rgba(0,212,255,0.05);
+    transition:background 0.15s;
+  }
+  .data-table tr:hover td { background:rgba(0,212,255,0.04); }
+  .data-table tr:last-child td { border-bottom:none; }
+
+  .id-badge {
+    font-family:'Share Tech Mono',monospace;
+    font-size:11px;
+    color:var(--text-dim);
+  }
+
+  .flag { font-size:16px; margin-right:4px; }
+  .country-cell { display:flex; align-items:center; gap:4px; }
+
+  .role-badge {
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:1px;
+    font-family:'Share Tech Mono',monospace;
+  }
+  .role-Sniper { background:rgba(232,25,44,0.15); color:var(--accent-red); border:1px solid rgba(232,25,44,0.3); }
+  .role-Support { background:rgba(0,212,255,0.1); color:var(--accent-cyan); border:1px solid rgba(0,212,255,0.2); }
+  .role-Leader { background:rgba(255,193,7,0.1); color:var(--accent-gold); border:1px solid rgba(255,193,7,0.2); }
+  .role-Attacker { background:rgba(168,85,247,0.1); color:var(--accent-purple); border:1px solid rgba(168,85,247,0.2); }
+  .role-Defender { background:rgba(0,255,136,0.1); color:var(--accent-green); border:1px solid rgba(0,255,136,0.2); }
+
+  .result-win {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 10px; border-radius:4px;
+    font-size:10px; font-weight:700; letter-spacing:1px;
+    background:rgba(0,255,136,0.1); color:var(--accent-green);
+    border:1px solid rgba(0,255,136,0.3);
+  }
+  .result-lose {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 10px; border-radius:4px;
+    font-size:10px; font-weight:700; letter-spacing:1px;
+    background:rgba(232,25,44,0.1); color:var(--accent-red);
+    border:1px solid rgba(232,25,44,0.3);
+  }
+
+  .prize-amount {
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px;
+    color:var(--accent-gold);
+    font-weight:600;
+  }
+
+  .action-cell { display:flex; gap:6px; }
+  .btn-details {
+    padding:5px 12px;
+    background:rgba(0,212,255,0.1);
+    border:1px solid rgba(0,212,255,0.3);
+    border-radius:4px;
+    color:var(--accent-cyan);
+    font-size:10px;
+    font-family:'Share Tech Mono',monospace;
+    cursor:pointer;
+    transition:all 0.2s;
+    letter-spacing:1px;
+  }
+  .btn-details:hover { background:rgba(0,212,255,0.2); box-shadow:var(--glow-cyan); }
+  .btn-edit {
+    padding:5px 10px;
+    background:rgba(255,193,7,0.1);
+    border:1px solid rgba(255,193,7,0.3);
+    border-radius:4px;
+    color:var(--accent-gold);
+    font-size:10px;
+    font-family:'Share Tech Mono',monospace;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .btn-edit:hover { background:rgba(255,193,7,0.2); }
+  .btn-del {
+    padding:5px 10px;
+    background:rgba(232,25,44,0.1);
+    border:1px solid rgba(232,25,44,0.3);
+    border-radius:4px;
+    color:var(--accent-red);
+    font-size:10px;
+    font-family:'Share Tech Mono',monospace;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .btn-del:hover { background:rgba(232,25,44,0.2); box-shadow:0 0 10px rgba(232,25,44,0.2); }
+
+  /* Pagination */
+  .pagination {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+  }
+  .page-info { font-size:11px; color:var(--text-dim); font-family:'Share Tech Mono',monospace; }
+  .page-btns { display:flex; gap:4px; }
+  .page-btn {
+    width:28px; height:28px;
+    border-radius:4px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text-secondary);
+    font-size:11px;
+    cursor:pointer;
+    transition:all 0.2s;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Share Tech Mono',monospace;
+  }
+  .page-btn:hover { border-color:var(--accent-cyan); color:var(--accent-cyan); }
+  .page-btn.active { background:var(--accent-red); border-color:var(--accent-red); color:#fff; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.8);
+    backdrop-filter:blur(4px);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    background: var(--bg-card2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:28px;
+    width:480px;
+    max-width:90vw;
+    position:relative;
+    animation:modalIn 0.25s ease;
+  }
+  @keyframes modalIn {
+    from { transform:scale(0.9); opacity:0; }
+    to { transform:scale(1); opacity:1; }
+  }
+  .modal-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:14px;
+    color:var(--accent-cyan);
+    letter-spacing:2px;
+    margin-bottom:20px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--border);
+  }
+  .modal-close {
+    position:absolute; top:20px; right:20px;
+    background:none; border:none;
+    color:var(--text-secondary); font-size:20px; cursor:pointer;
+    transition:color 0.2s;
+  }
+  .modal-close:hover { color:var(--accent-red); }
+  .modal-detail-row {
+    display:flex; justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid rgba(0,212,255,0.05);
+    font-size:13px;
+  }
+  .modal-detail-row:last-child { border-bottom:none; }
+  .detail-key { color:var(--text-secondary); font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:1px; }
+  .detail-val { color:var(--text-primary); font-weight:600; }
+  .modal-actions { display:flex; gap:10px; margin-top:20px; }
+  .modal-btn-cancel {
+    flex:1; padding:10px;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:6px;
+    color:var(--text-secondary);
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px; font-weight:700;
+    cursor:pointer;
+    transition:all 0.2s;
+    letter-spacing:1px;
+  }
+  .modal-btn-cancel:hover { border-color:var(--accent-cyan); color:var(--accent-cyan); }
+  .modal-btn-confirm {
+    flex:1; padding:10px;
+    background: var(--accent-red);
+    border:none; border-radius:6px;
+    color:#fff;
+    font-family:'Orbitron',sans-serif;
+    font-size:10px; font-weight:700;
+    cursor:pointer;
+    transition:all 0.2s;
+    letter-spacing:2px;
+  }
+  .modal-btn-confirm:hover { background:#ff1f36; box-shadow:var(--glow-red); }
+
+  /* Edit modal */
+  .modal.edit-modal { width:520px; }
+
+  /* Toast */
+  .toast {
+    position:fixed;
+    bottom:28px; right:28px;
+    padding:14px 20px;
+    border-radius:8px;
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px;
+    letter-spacing:1px;
+    z-index:9999;
+    opacity:0;
+    transform:translateY(10px);
+    transition:all 0.3s;
+    pointer-events:none;
+  }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .toast.success { background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.4); color:var(--accent-green); }
+  .toast.error { background:rgba(232,25,44,0.15); border:1px solid rgba(232,25,44,0.4); color:var(--accent-red); }
+  .toast.info { background:rgba(0,212,255,0.15); border:1px solid rgba(0,212,255,0.4); color:var(--accent-cyan); }
+
+  /* ===== SECTION VISIBILITY ===== */
+  .tab-section { display:none; }
+  .tab-section.active { display:block; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align:center;
+    padding:16px;
+    font-size:11px;
+    color:var(--text-dim);
+    border-top:1px solid var(--border);
+    font-family:'Share Tech Mono',monospace;
+  }
+
+  /* ===== ER NOTE / INSIGHTS HEADER ===== */
+  .er-note {
+    background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(232,25,44,0.04));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 20px;
+  }
+  .er-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .er-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ===== REPORT SUMMARY GRID ===== */
+  .report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .report-summary-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
+  }
+  .report-summary-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-cyan), transparent);
+  }
+  .summary-big {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .summary-label { font-size: 12px; color: var(--text-secondary); }
+  .summary-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-family: 'Share Tech Mono', monospace; }
+
+  /* Gear type badge */
+  .gear-badge {
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:10px;
+    font-family:'Share Tech Mono',monospace;
+    font-weight:700;
+    letter-spacing:1px;
+  }
+  .gear-Headset { background:rgba(168,85,247,0.1); color:var(--accent-purple); border:1px solid rgba(168,85,247,0.2); }
+  .gear-Mouse { background:rgba(0,212,255,0.1); color:var(--accent-cyan); border:1px solid rgba(0,212,255,0.2); }
+  .gear-Keyboard { background:rgba(255,193,7,0.1); color:var(--accent-gold); border:1px solid rgba(255,193,7,0.2); }
+
+  /* Report Section */
+  .report-section { margin-bottom:28px; }
+  .report-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+  .report-card {
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+  }
+  .report-card-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:11px;
+    color:var(--text-secondary);
+    letter-spacing:2px;
+    margin-bottom:12px;
+  }
+  .winrate-bar { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .winrate-label { font-size:12px; width:120px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { flex:1; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+  .bar-fill.win { background:linear-gradient(90deg,var(--accent-green),#00cc6a); }
+  .bar-fill.lose { background:linear-gradient(90deg,var(--accent-red),#c41020); }
+  .bar-pct { font-size:11px; font-family:'Share Tech Mono',monospace; width:34px; text-align:right; }
+
+  .full-width-panel {
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:24px;
+    margin-bottom:20px;
+  }
+
+  /* ER Diagram Note */
+
+  /* Inline form row */
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  /* Confirm delete modal */
+  .del-warning {
+    background:rgba(232,25,44,0.08);
+    border:1px solid rgba(232,25,44,0.2);
+    border-radius:8px;
+    padding:14px;
+    margin:16px 0;
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.6;
+  }
+  .del-target { color:var(--accent-red); font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="logo-title">E-SPORTS</div>
+      <div class="logo-sub">COMMAND CENTER</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">MAIN MENU</div>
+      <div class="nav-item active" onclick="switchTab('dashboard')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        DASHBOARD
+      </div>
+      <div class="nav-item" onclick="switchTab('teams')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        TEAMS
+      </div>
+      <div class="nav-item" onclick="switchTab('players')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+        PLAYERS
+      </div>
+      <div class="nav-item" onclick="switchTab('gears')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        GEAR
+      </div>
+      <div class="nav-item" onclick="switchTab('tournaments')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 21v-4M17 3H7l-4 9h18l-4-9z"/></svg>
+        TOURNAMENTS
+      </div>
+      <div class="nav-item" onclick="switchTab('matchresults')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 9H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S16.33 9 15.5 9z"/><path d="M10 9.5c0 .83-.67 1.5-1.5 1.5h-5C2.67 11 2 10.33 2 9.5S2.67 8 3.5 8h5c.83 0 1.5.67 1.5 1.5z"/><path d="M8.5 15H10v-1.5c0-.83-.67-1.5-1.5-1.5S7 12.67 7 13.5s.67 1.5 1.5 1.5z"/></svg>
+        MATCH RESULTS
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">SYSTEM</div>
+      <div class="nav-item" onclick="switchTab('report')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        REPORTS
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="champions-box">
+      <div class="trophy-icon">🏆</div>
+      <div class="champ-title">CHAMPIONS</div>
+      <div class="champ-quote">"Talent wins games, but teamwork wins championships."<br><br>- Michael Jordan</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="pageTitle">DASHBOARD</div>
+        <div class="breadcrumb">/ MAIN / <span id="breadcrumb">OVERVIEW</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-dot"></div>
+        <div class="topbar-clock" id="clock">📅 19 May 2026 &nbsp;|&nbsp; ⏱ 00:00:00</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ======== DASHBOARD ======== -->
+      <div id="tab-dashboard" class="tab-section active">
+        <div class="hero-banner">
+          <div class="hero-title">E-SPORTS</div>
+          <div class="hero-sub">COMMAND CENTER</div>
+          <div class="hero-desc">จัดการทีม ผู้เล่น ทัวร์นาเมนต์ และผลการแข่งขัน</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card red" onclick="switchTab('teams')">
+            <div class="stat-icon">👥</div>
+            <div class="stat-num" id="cnt-teams">10</div>
+            <div class="stat-label">TEAMS</div>
+          </div>
+          <div class="stat-card cyan" onclick="switchTab('players')">
+            <div class="stat-icon">🎮</div>
+            <div class="stat-num" id="cnt-players">10</div>
+            <div class="stat-label">PLAYERS</div>
+          </div>
+          <div class="stat-card gold" onclick="switchTab('gears')">
+            <div class="stat-icon">🖱️</div>
+            <div class="stat-num" id="cnt-gears">10</div>
+            <div class="stat-label">GEAR</div>
+          </div>
+          <div class="stat-card green" onclick="switchTab('tournaments')">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-num" id="cnt-tournaments">10</div>
+            <div class="stat-label">TOURNAMENTS</div>
+          </div>
+          <div class="stat-card purple" onclick="switchTab('matchresults')">
+            <div class="stat-icon">⚔️</div>
+            <div class="stat-num" id="cnt-matches">10</div>
+            <div class="stat-label">MATCH RESULTS</div>
+          </div>
+        </div>
+
+        <!-- Mini tables preview -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <div class="table-panel">
+            <div class="panel-title"><span class="panel-title-icon">👥</span> RECENT TEAMS</div>
+            <table class="data-table">
+              <thead><tr><th>#</th><th>TEAM</th><th>COUNTRY</th></tr></thead>
+              <tbody id="dash-teams"></tbody>
+            </table>
+          </div>
+          <div class="table-panel">
+            <div class="panel-title"><span class="panel-title-icon">⚔️</span> RECENT MATCHES</div>
+            <table class="data-table">
+              <thead><tr><th>TEAM</th><th>TOURNAMENT</th><th>RESULT</th></tr></thead>
+              <tbody id="dash-matches"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="table-panel">
+            <div class="panel-title"><span class="panel-title-icon">🏆</span> TOP TOURNAMENTS</div>
+            <table class="data-table">
+              <thead><tr><th>TOURNAMENT</th><th>PRIZE POOL</th></tr></thead>
+              <tbody id="dash-tournaments"></tbody>
+            </table>
+          </div>
+          <div class="table-panel">
+            <div class="panel-title"><span class="panel-title-icon">🎮</span> PLAYERS</div>
+            <table class="data-table">
+              <thead><tr><th>PLAYER</th><th>ROLE</th><th>TEAM</th></tr></thead>
+              <tbody id="dash-players"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== TEAMS ======== -->
+      <div id="tab-teams" class="tab-section">
+        <div class="section-grid">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-icon">👥</span> REGISTER TEAM</div>
+            <div class="form-group">
+              <label class="form-label">TEAM NAME <span class="req">*</span></label>
+              <input class="form-input" id="team-name" placeholder="Enter team name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">COACH / MANAGER</label>
+              <input class="form-input" id="team-coach" placeholder="Enter coach or manager name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">COUNTRY</label>
+              <input class="form-input" id="team-country" placeholder="Enter country">
+            </div>
+            <button class="btn-primary" onclick="addTeam()">➕ REGISTER TEAM</button>
+          </div>
+          <div class="table-panel">
+            <div class="table-header">
+              <div class="table-title">🛡️ REGISTERED TEAMS</div>
+              <div class="search-bar">
+                <input class="search-input" id="search-teams" placeholder="🔍 Search teams..." oninput="renderTeams()">
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>TEAM NAME</th><th>COACH/MANAGER</th><th>COUNTRY</th><th>ACTION</th></tr></thead>
+              <tbody id="teams-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <div class="page-info" id="teams-page-info"></div>
+              <div class="page-btns" id="teams-page-btns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== PLAYERS ======== -->
+      <div id="tab-players" class="tab-section">
+        <div class="section-grid">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-icon">🎮</span> ADD PLAYER</div>
+            <div class="form-group">
+              <label class="form-label">PLAYER NAME <span class="req">*</span></label>
+              <input class="form-input" id="p-name" placeholder="Player nickname">
+            </div>
+            <div class="form-group">
+              <label class="form-label">TEAM</label>
+              <select class="form-input" id="p-team"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">GAME ROLE</label>
+              <select class="form-input" id="p-role">
+                <option>Sniper</option><option>Support</option><option>Leader</option><option>Attacker</option><option>Defender</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">AGE</label>
+              <input class="form-input" id="p-age" type="number" placeholder="Age" min="16" max="40">
+            </div>
+            <button class="btn-primary" onclick="addPlayer()">➕ ADD PLAYER</button>
+          </div>
+          <div class="table-panel">
+            <div class="table-header">
+              <div class="table-title">🎮 PLAYERS ROSTER</div>
+              <input class="search-input" id="search-players" placeholder="🔍 Search players..." oninput="renderPlayers()">
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>PLAYER</th><th>TEAM</th><th>ROLE</th><th>AGE</th><th>ACTION</th></tr></thead>
+              <tbody id="players-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <div class="page-info" id="players-page-info"></div>
+              <div class="page-btns" id="players-page-btns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== GEAR ======== -->
+      <div id="tab-gears" class="tab-section">
+        <div class="section-grid">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-icon">🖱️</span> ADD GEAR</div>
+            <div class="form-group">
+              <label class="form-label">GEAR NAME <span class="req">*</span></label>
+              <input class="form-input" id="g-name" placeholder="Gear model name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">PLAYER</label>
+              <select class="form-input" id="g-player"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">GEAR TYPE</label>
+              <select class="form-input" id="g-type">
+                <option>Headset</option><option>Mouse</option><option>Keyboard</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">BRAND</label>
+              <input class="form-input" id="g-brand" placeholder="Brand name">
+            </div>
+            <button class="btn-primary" onclick="addGear()">➕ ADD GEAR</button>
+          </div>
+          <div class="table-panel">
+            <div class="table-header">
+              <div class="table-title">⚙️ GEAR INVENTORY</div>
+              <input class="search-input" id="search-gears" placeholder="🔍 Search gear..." oninput="renderGears()">
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>GEAR NAME</th><th>PLAYER</th><th>TYPE</th><th>BRAND</th><th>ACTION</th></tr></thead>
+              <tbody id="gears-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <div class="page-info" id="gears-page-info"></div>
+              <div class="page-btns" id="gears-page-btns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== TOURNAMENTS ======== -->
+      <div id="tab-tournaments" class="tab-section">
+        <div class="section-grid">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-icon">🏆</span> ADD TOURNAMENT</div>
+            <div class="form-group">
+              <label class="form-label">TOURNAMENT NAME <span class="req">*</span></label>
+              <input class="form-input" id="t-name" placeholder="Tournament name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">LOCATION</label>
+              <input class="form-input" id="t-location" placeholder="City, Country">
+            </div>
+            <div class="form-group">
+              <label class="form-label">PRIZE POOL ($)</label>
+              <input class="form-input" id="t-prize" type="number" placeholder="e.g. 500000">
+            </div>
+            <button class="btn-primary" onclick="addTournament()">➕ ADD TOURNAMENT</button>
+          </div>
+          <div class="table-panel">
+            <div class="table-header">
+              <div class="table-title">🏆 TOURNAMENTS</div>
+              <input class="search-input" id="search-tournaments" placeholder="🔍 Search..." oninput="renderTournaments()">
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>NAME</th><th>LOCATION</th><th>PRIZE POOL</th><th>ACTION</th></tr></thead>
+              <tbody id="tournaments-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <div class="page-info" id="tournaments-page-info"></div>
+              <div class="page-btns" id="tournaments-page-btns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== MATCH RESULTS ======== -->
+      <div id="tab-matchresults" class="tab-section">
+        <div class="section-grid">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-icon">⚔️</span> ADD MATCH RESULT</div>
+            <div class="form-group">
+              <label class="form-label">TOURNAMENT</label>
+              <select class="form-input" id="m-tournament"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">TEAM</label>
+              <select class="form-input" id="m-team"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">MATCH DATE</label>
+              <input class="form-input" id="m-date" type="date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">RESULT</label>
+              <select class="form-input" id="m-result">
+                <option>Win</option><option>Lose</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="addMatch()">➕ ADD RESULT</button>
+          </div>
+          <div class="table-panel">
+            <div class="table-header">
+              <div class="table-title">⚔️ MATCH RESULTS</div>
+              <input class="search-input" id="search-matches" placeholder="🔍 Search..." oninput="renderMatches()">
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>TOURNAMENT</th><th>TEAM</th><th>DATE</th><th>RESULT</th><th>ACTION</th></tr></thead>
+              <tbody id="matches-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <div class="page-info" id="matches-page-info"></div>
+              <div class="page-btns" id="matches-page-btns"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== REPORT ======== -->
+      <div id="tab-report" class="tab-section">
+        <div class="er-note">
+          <div class="er-title">REPORT INSIGHTS</div>
+          <div class="er-text">This page gives you a complete snapshot of your esport program. Check the live win-rate distribution, prize pool rankings, and player role balance to quickly identify top performers and the healthiest roster mix.</div>
+        </div>
+        <div class="report-summary-grid">
+          <div class="report-card report-summary-card">
+            <div class="report-card-title">📌 OVERALL REPORT</div>
+            <div id="summary-text"></div>
+          </div>
+          <div class="report-card report-summary-card">
+            <div class="report-card-title">🏅 BEST PERFORMER</div>
+            <div id="top-team"></div>
+          </div>
+          <div class="report-card report-summary-card">
+            <div class="report-card-title">💰 TOP TOURNAMENT</div>
+            <div id="top-tournament"></div>
+          </div>
+          <div class="report-card report-summary-card">
+            <div class="report-card-title">⚡ MATCH OUTCOMES</div>
+            <div id="result-overview"></div>
+          </div>
+        </div>
+        <div class="report-grid">
+          <div class="report-card">
+            <div class="report-card-title">📊 WIN RATE BY TEAM</div>
+            <div id="winrate-chart"></div>
+          </div>
+          <div class="report-card">
+            <div class="report-card-title">🏆 PRIZE POOL RANKING</div>
+            <div id="prize-chart"></div>
+          </div>
+          <div class="report-card">
+            <div class="report-card-title">🎮 PLAYERS BY ROLE</div>
+            <div id="role-chart"></div>
+          </div>
+        </div>
+
+    <div class="footer">© 2026 Esports Team Management System. All rights reserved. | CS104 Mini-Project</div>
+  </main>
+</div>
+
+<!-- ===== MODALS ===== -->
+<!-- Details -->
+<div class="modal-overlay" id="modal-details">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-details')">✕</button>
+    <div class="modal-title" id="modal-details-title">DETAILS</div>
+    <div id="modal-details-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('modal-details')">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal edit-modal">
+    <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+    <div class="modal-title" id="modal-edit-title">EDIT RECORD</div>
+    <div id="modal-edit-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('modal-edit')">CANCEL</button>
+      <button class="modal-btn-confirm" id="modal-edit-save" onclick="saveEdit()">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-delete')">✕</button>
+    <div class="modal-title">⚠️ CONFIRM DELETE</div>
+    <div class="del-warning">Are you sure you want to delete <span class="del-target" id="del-target-name"></span>? This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('modal-delete')">CANCEL</button>
+      <button class="modal-btn-confirm" onclick="confirmDelete()">DELETE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATABASE (in-memory from SQLite) =====
+const DB = {
+  teams: [
+    {team_id:1,team_name:"Phoenix Esports",coach_name:"John Smith",country:"Thailand"},
+    {team_id:2,team_name:"Dragon Gaming",coach_name:"Mike Lee",country:"Korea"},
+    {team_id:3,team_name:"Titan Force",coach_name:"Alex Kim",country:"Japan"},
+    {team_id:4,team_name:"Shadow Wolves",coach_name:"Chris Tan",country:"Singapore"},
+    {team_id:5,team_name:"Nova Squad",coach_name:"Daniel Park",country:"Malaysia"},
+    {team_id:6,team_name:"Cyber Storm",coach_name:"Ryan Lee",country:"USA"},
+    {team_id:7,team_name:"Inferno X",coach_name:"Kevin Chan",country:"China"},
+    {team_id:8,team_name:"Rapid Fire",coach_name:"Tom Wilson",country:"Canada"},
+    {team_id:9,team_name:"Night Raiders",coach_name:"Mark Chen",country:"Taiwan"},
+    {team_id:10,team_name:"Zero Gravity",coach_name:"Lucas Wong",country:"Hong Kong"},
+  ],
+  players: [
+    {player_id:1,team_id:1,player_name:"Nexus",game_role:"Sniper",age:20},
+    {player_id:2,team_id:1,player_name:"Blaze",game_role:"Support",age:22},
+    {player_id:3,team_id:2,player_name:"Shadow",game_role:"Leader",age:24},
+    {player_id:4,team_id:2,player_name:"Frost",game_role:"Attacker",age:21},
+    {player_id:5,team_id:3,player_name:"Venom",game_role:"Defender",age:23},
+    {player_id:6,team_id:4,player_name:"Storm",game_role:"Sniper",age:19},
+    {player_id:7,team_id:5,player_name:"Ghost",game_role:"Support",age:25},
+    {player_id:8,team_id:6,player_name:"Hunter",game_role:"Leader",age:20},
+    {player_id:9,team_id:7,player_name:"Ace",game_role:"Attacker",age:22},
+    {player_id:10,team_id:8,player_name:"Rogue",game_role:"Defender",age:21},
+  ],
+  gears: [
+    {gear_id:1,player_id:1,gear_name:"G Pro X",gear_type:"Headset",brand:"Logitech"},
+    {gear_id:2,player_id:1,gear_name:"Viper Mini",gear_type:"Mouse",brand:"Razer"},
+    {gear_id:3,player_id:2,gear_name:"Alloy FPS",gear_type:"Keyboard",brand:"HyperX"},
+    {gear_id:4,player_id:3,gear_name:"Arctis 7",gear_type:"Headset",brand:"SteelSeries"},
+    {gear_id:5,player_id:4,gear_name:"DeathAdder V3",gear_type:"Mouse",brand:"Razer"},
+    {gear_id:6,player_id:5,gear_name:"K70 RGB",gear_type:"Keyboard",brand:"Corsair"},
+    {gear_id:7,player_id:6,gear_name:"Cloud II",gear_type:"Headset",brand:"HyperX"},
+    {gear_id:8,player_id:7,gear_name:"G502 Hero",gear_type:"Mouse",brand:"Logitech"},
+    {gear_id:9,player_id:8,gear_name:"Apex Pro",gear_type:"Keyboard",brand:"SteelSeries"},
+    {gear_id:10,player_id:9,gear_name:"BlackShark V2",gear_type:"Headset",brand:"Razer"},
+  ],
+  tournaments: [
+    {tournament_id:1,tournament_name:"Valorant Masters",location:"Bangkok",prize_pool:500000},
+    {tournament_id:2,tournament_name:"PUBG Championship",location:"Seoul",prize_pool:750000},
+    {tournament_id:3,tournament_name:"CS2 Global Cup",location:"Tokyo",prize_pool:1000000},
+    {tournament_id:4,tournament_name:"Apex Legends Open",location:"Singapore",prize_pool:300000},
+    {tournament_id:5,tournament_name:"League Clash",location:"Taipei",prize_pool:450000},
+    {tournament_id:6,tournament_name:"Dota World Arena",location:"Shanghai",prize_pool:900000},
+    {tournament_id:7,tournament_name:"Mobile Legends Cup",location:"Jakarta",prize_pool:600000},
+    {tournament_id:8,tournament_name:"Overwatch League",location:"Los Angeles",prize_pool:850000},
+    {tournament_id:9,tournament_name:"Rocket League Finals",location:"London",prize_pool:400000},
+    {tournament_id:10,tournament_name:"Fortnite World Series",location:"New York",prize_pool:1200000},
+  ],
+  match_results: [
+    {result_id:1,tournament_id:1,team_id:1,match_date:"2026-05-01",result:"Win"},
+    {result_id:2,tournament_id:1,team_id:2,match_date:"2026-05-01",result:"Lose"},
+    {result_id:3,tournament_id:2,team_id:3,match_date:"2026-05-03",result:"Win"},
+    {result_id:4,tournament_id:2,team_id:4,match_date:"2026-05-03",result:"Lose"},
+    {result_id:5,tournament_id:3,team_id:5,match_date:"2026-05-05",result:"Win"},
+    {result_id:6,tournament_id:3,team_id:6,match_date:"2026-05-05",result:"Lose"},
+    {result_id:7,tournament_id:4,team_id:7,match_date:"2026-05-06",result:"Win"},
+    {result_id:8,tournament_id:5,team_id:8,match_date:"2026-05-07",result:"Lose"},
+    {result_id:9,tournament_id:6,team_id:9,match_date:"2026-05-08",result:"Win"},
+    {result_id:10,tournament_id:7,team_id:10,match_date:"2026-05-09",result:"Lose"},
+  ],
+  nextId: {teams:11,players:11,gears:11,tournaments:11,matches:11}
+};
+
+// ===== HELPERS =====
+const FLAGS = {Thailand:'🇹🇭',Korea:'🇰🇷',Japan:'🇯🇵',Singapore:'🇸🇬',Malaysia:'🇲🇾',USA:'🇺🇸',China:'🇨🇳',Canada:'🇨🇦',Taiwan:'🇹🇼','Hong Kong':'🇭🇰',Australia:'🇦🇺',UK:'🇬🇧',Germany:'🇩🇪',France:'🇫🇷'};
+function flag(c){ return FLAGS[c] || '🏳️'; }
+function teamName(id){ const t=DB.teams.find(t=>t.team_id===id); return t?t.team_name:'Unknown'; }
+function playerName(id){ const p=DB.players.find(p=>p.player_id===id); return p?p.player_name:'Unknown'; }
+function tournamentName(id){ const t=DB.tournaments.find(t=>t.tournament_id===id); return t?t.tournament_name:'Unknown'; }
+function fmtPrize(n){ return '$'+Number(n).toLocaleString(); }
+
+// ===== PAGINATION state =====
+const pages = {teams:1,players:1,gears:1,tournaments:1,matches:1};
+const perPage = 10;
+
+// ===== CLOCK =====
+function updateClock(){
+  const now=new Date();
+  const d=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  const t=now.toLocaleTimeString('en-GB');
+  document.getElementById('clock').innerHTML=`📅 ${d} &nbsp;|&nbsp; ⏱ ${t}`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ===== NAV =====
+function switchTab(tab){
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const labels={dashboard:'DASHBOARD',teams:'TEAMS',players:'PLAYERS',gears:'GEAR',tournaments:'TOURNAMENTS',matchresults:'MATCH RESULTS',report:'REPORTS'};
+  document.getElementById('pageTitle').textContent=labels[tab]||tab.toUpperCase();
+  document.getElementById('breadcrumb').textContent=labels[tab]||tab.toUpperCase();
+
+  // highlight nav
+  const navMap={dashboard:0,teams:1,players:2,gears:3,tournaments:4,matchresults:5,report:6};
+  const navItems=document.querySelectorAll('.nav-item');
+  const idx=navMap[tab];
+  if(idx!==undefined && navItems[idx]) navItems[idx].classList.add('active');
+
+  if(tab==='teams') renderTeams();
+  if(tab==='players'){ populatePlayerSelects(); renderPlayers(); }
+  if(tab==='gears'){ populateGearSelects(); renderGears(); }
+  if(tab==='tournaments') renderTournaments();
+  if(tab==='matchresults'){ populateMatchSelects(); renderMatches(); }
+  if(tab==='report') renderReport();
+  if(tab==='dashboard') renderDashboard();
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ===== MODAL =====
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+
+// ===== DELETE STATE =====
+let deleteState={table:'',id:0,name:''};
+function triggerDelete(table,id,name){
+  deleteState={table,id,name};
+  document.getElementById('del-target-name').textContent=name;
+  openModal('modal-delete');
+}
+function confirmDelete(){
+  const {table,id}=deleteState;
+  if(table==='teams') DB.teams=DB.teams.filter(r=>r.team_id!==id);
+  if(table==='players') DB.players=DB.players.filter(r=>r.player_id!==id);
+  if(table==='gears') DB.gears=DB.gears.filter(r=>r.gear_id!==id);
+  if(table==='tournaments') DB.tournaments=DB.tournaments.filter(r=>r.tournament_id!==id);
+  if(table==='matches') DB.match_results=DB.match_results.filter(r=>r.result_id!==id);
+  closeModal('modal-delete');
+  showToast(`Deleted successfully`,'error');
+  renderAll();
+  updateCounts();
+}
+
+// ===== EDIT STATE =====
+let editState={table:'',id:0};
+function saveEdit(){
+  const table=editState.table; const id=editState.id;
+  if(table==='teams'){
+    const r=DB.teams.find(r=>r.team_id===id);
+    r.team_name=document.getElementById('edit-team_name').value.trim()||r.team_name;
+    r.coach_name=document.getElementById('edit-coach_name').value.trim();
+    r.country=document.getElementById('edit-country').value.trim();
+  }
+  if(table==='players'){
+    const r=DB.players.find(r=>r.player_id===id);
+    r.player_name=document.getElementById('edit-player_name').value.trim()||r.player_name;
+    r.game_role=document.getElementById('edit-game_role').value;
+    r.age=parseInt(document.getElementById('edit-age').value)||r.age;
+    r.team_id=parseInt(document.getElementById('edit-team_id').value);
+  }
+  if(table==='gears'){
+    const r=DB.gears.find(r=>r.gear_id===id);
+    r.gear_name=document.getElementById('edit-gear_name').value.trim()||r.gear_name;
+    r.gear_type=document.getElementById('edit-gear_type').value;
+    r.brand=document.getElementById('edit-brand').value.trim();
+    r.player_id=parseInt(document.getElementById('edit-player_id').value);
+  }
+  if(table==='tournaments'){
+    const r=DB.tournaments.find(r=>r.tournament_id===id);
+    r.tournament_name=document.getElementById('edit-tournament_name').value.trim()||r.tournament_name;
+    r.location=document.getElementById('edit-location').value.trim();
+    r.prize_pool=parseFloat(document.getElementById('edit-prize_pool').value)||r.prize_pool;
+  }
+  if(table==='matches'){
+    const r=DB.match_results.find(r=>r.result_id===id);
+    r.tournament_id=parseInt(document.getElementById('edit-tournament_id').value);
+    r.team_id=parseInt(document.getElementById('edit-team_id2').value);
+    r.match_date=document.getElementById('edit-match_date').value;
+    r.result=document.getElementById('edit-result').value;
+  }
+  closeModal('modal-edit');
+  showToast('Updated successfully','info');
+  renderAll();
+}
+
+// ===== RENDER HELPERS =====
+function makePagination(table, total, page, setPage, render){
+  const totalPages=Math.ceil(total/perPage);
+  const start=(page-1)*perPage+1; const end=Math.min(page*perPage,total);
+  document.getElementById(table+'-page-info').textContent=`Showing ${start}-${end} of ${total}`;
+  const c=document.getElementById(table+'-page-btns');
+  c.innerHTML='';
+  const mk=(label,p,active)=>{
+    const b=document.createElement('button');
+    b.className='page-btn'+(active?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{ setPage(p); render(); };
+    c.appendChild(b);
+  };
+  if(page>1) mk('‹',page-1,false);
+  for(let i=1;i<=totalPages;i++) mk(i,i,i===page);
+  if(page<totalPages) mk('›',page+1,false);
+}
+
+// ===== RENDER TEAMS =====
+function renderTeams(){
+  const q=(document.getElementById('search-teams').value||'').toLowerCase();
+  let data=DB.teams.filter(r=>r.team_name.toLowerCase().includes(q)||r.coach_name.toLowerCase().includes(q)||r.country.toLowerCase().includes(q));
+  const p=pages.teams;
+  const slice=data.slice((p-1)*perPage,p*perPage);
+  document.getElementById('teams-tbody').innerHTML=slice.map(r=>`
+    <tr>
+      <td class="id-badge">${r.team_id}</td>
+      <td><strong>${r.team_name}</strong></td>
+      <td>${r.coach_name}</td>
+      <td><div class="country-cell">${flag(r.country)} ${r.country}</div></td>
+      <td><div class="action-cell">
+        <button class="btn-details" onclick="showTeamDetails(${r.team_id})">DETAILS</button>
+        <button class="btn-edit" onclick="showTeamEdit(${r.team_id})">EDIT</button>
+        <button class="btn-del" onclick="triggerDelete('teams',${r.team_id},'${r.team_name}')">DELETE</button>
+      </div></td>
+    </tr>`).join('');
+  makePagination('teams',data.length,p,(pp)=>pages.teams=pp,renderTeams);
+}
+
+function showTeamDetails(id){
+  const r=DB.teams.find(r=>r.team_id===id);
+  const players=DB.players.filter(p=>p.team_id===id);
+  const wins=DB.match_results.filter(m=>m.team_id===id&&m.result==='Win').length;
+  const total=DB.match_results.filter(m=>m.team_id===id).length;
+  document.getElementById('modal-details-title').textContent=`🛡️ ${r.team_name}`;
+  document.getElementById('modal-details-body').innerHTML=`
+    <div class="modal-detail-row"><span class="detail-key">TEAM ID</span><span class="detail-val">#${r.team_id}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">COACH</span><span class="detail-val">${r.coach_name}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">COUNTRY</span><span class="detail-val">${flag(r.country)} ${r.country}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">PLAYERS</span><span class="detail-val">${players.map(p=>`<span class="role-badge role-${p.game_role}">${p.player_name}</span>`).join(' ')||'None'}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">WIN / MATCHES</span><span class="detail-val">${wins} / ${total}</span></div>
+  `;
+  openModal('modal-details');
+}
+
+function showTeamEdit(id){
+  const r=DB.teams.find(r=>r.team_id===id);
+  editState={table:'teams',id};
+  document.getElementById('modal-edit-title').textContent='✏️ EDIT TEAM';
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">TEAM NAME</label><input class="form-input" id="edit-team_name" value="${r.team_name}"></div>
+    <div class="form-group"><label class="form-label">COACH/MANAGER</label><input class="form-input" id="edit-coach_name" value="${r.coach_name}"></div>
+    <div class="form-group"><label class="form-label">COUNTRY</label><input class="form-input" id="edit-country" value="${r.country}"></div>
+  `;
+  openModal('modal-edit');
+}
+
+function addTeam(){
+  const name=document.getElementById('team-name').value.trim();
+  if(!name){showToast('Team name is required','error');return;}
+  DB.teams.push({team_id:DB.nextId.teams++,team_name:name,coach_name:document.getElementById('team-coach').value.trim(),country:document.getElementById('team-country').value.trim()});
+  document.getElementById('team-name').value='';document.getElementById('team-coach').value='';document.getElementById('team-country').value='';
+  renderTeams(); updateCounts(); showToast('Team registered!');
+}
+
+// ===== RENDER PLAYERS =====
+function populatePlayerSelects(){
+  const sel=document.getElementById('p-team');
+  sel.innerHTML=DB.teams.map(t=>`<option value="${t.team_id}">${t.team_name}</option>`).join('');
+}
+function renderPlayers(){
+  const q=(document.getElementById('search-players').value||'').toLowerCase();
+  let data=DB.players.filter(r=>r.player_name.toLowerCase().includes(q)||r.game_role.toLowerCase().includes(q)||teamName(r.team_id).toLowerCase().includes(q));
+  const p=pages.players;
+  const slice=data.slice((p-1)*perPage,p*perPage);
+  document.getElementById('players-tbody').innerHTML=slice.map(r=>`
+    <tr>
+      <td class="id-badge">${r.player_id}</td>
+      <td><strong>${r.player_name}</strong></td>
+      <td>${teamName(r.team_id)}</td>
+      <td><span class="role-badge role-${r.game_role}">${r.game_role}</span></td>
+      <td>${r.age}</td>
+      <td><div class="action-cell">
+        <button class="btn-details" onclick="showPlayerDetails(${r.player_id})">DETAILS</button>
+        <button class="btn-edit" onclick="showPlayerEdit(${r.player_id})">EDIT</button>
+        <button class="btn-del" onclick="triggerDelete('players',${r.player_id},'${r.player_name}')">DELETE</button>
+      </div></td>
+    </tr>`).join('');
+  makePagination('players',data.length,p,(pp)=>pages.players=pp,renderPlayers);
+}
+
+function showPlayerDetails(id){
+  const r=DB.players.find(r=>r.player_id===id);
+  const gears=DB.gears.filter(g=>g.player_id===id);
+  document.getElementById('modal-details-title').textContent=`🎮 ${r.player_name}`;
+  document.getElementById('modal-details-body').innerHTML=`
+    <div class="modal-detail-row"><span class="detail-key">PLAYER ID</span><span class="detail-val">#${r.player_id}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">TEAM</span><span class="detail-val">${teamName(r.team_id)}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">ROLE</span><span class="detail-val"><span class="role-badge role-${r.game_role}">${r.game_role}</span></span></div>
+    <div class="modal-detail-row"><span class="detail-key">AGE</span><span class="detail-val">${r.age} years</span></div>
+    <div class="modal-detail-row"><span class="detail-key">GEAR</span><span class="detail-val">${gears.map(g=>`${g.gear_name} (${g.gear_type})`).join(', ')||'None'}</span></div>
+  `;
+  openModal('modal-details');
+}
+
+function showPlayerEdit(id){
+  const r=DB.players.find(r=>r.player_id===id);
+  editState={table:'players',id};
+  document.getElementById('modal-edit-title').textContent='✏️ EDIT PLAYER';
+  const teamOpts=DB.teams.map(t=>`<option value="${t.team_id}"${t.team_id===r.team_id?' selected':''}>${t.team_name}</option>`).join('');
+  const roleOpts=['Sniper','Support','Leader','Attacker','Defender'].map(ro=>`<option${ro===r.game_role?' selected':''}>${ro}</option>`).join('');
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">PLAYER NAME</label><input class="form-input" id="edit-player_name" value="${r.player_name}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">TEAM</label><select class="form-input" id="edit-team_id">${teamOpts}</select></div>
+      <div class="form-group"><label class="form-label">ROLE</label><select class="form-input" id="edit-game_role">${roleOpts}</select></div>
+    </div>
+    <div class="form-group"><label class="form-label">AGE</label><input class="form-input" id="edit-age" type="number" value="${r.age}"></div>
+  `;
+  openModal('modal-edit');
+}
+
+function addPlayer(){
+  const name=document.getElementById('p-name').value.trim();
+  if(!name){showToast('Player name is required','error');return;}
+  DB.players.push({player_id:DB.nextId.players++,team_id:parseInt(document.getElementById('p-team').value),player_name:name,game_role:document.getElementById('p-role').value,age:parseInt(document.getElementById('p-age').value)||18});
+  document.getElementById('p-name').value='';document.getElementById('p-age').value='';
+  renderPlayers(); updateCounts(); showToast('Player added!');
+}
+
+// ===== RENDER GEARS =====
+function populateGearSelects(){
+  const sel=document.getElementById('g-player');
+  sel.innerHTML=DB.players.map(p=>`<option value="${p.player_id}">${p.player_name}</option>`).join('');
+}
+function renderGears(){
+  const q=(document.getElementById('search-gears').value||'').toLowerCase();
+  let data=DB.gears.filter(r=>r.gear_name.toLowerCase().includes(q)||r.gear_type.toLowerCase().includes(q)||r.brand.toLowerCase().includes(q)||playerName(r.player_id).toLowerCase().includes(q));
+  const p=pages.gears;
+  const slice=data.slice((p-1)*perPage,p*perPage);
+  document.getElementById('gears-tbody').innerHTML=slice.map(r=>`
+    <tr>
+      <td class="id-badge">${r.gear_id}</td>
+      <td><strong>${r.gear_name}</strong></td>
+      <td>${playerName(r.player_id)}</td>
+      <td><span class="gear-badge gear-${r.gear_type}">${r.gear_type}</span></td>
+      <td>${r.brand}</td>
+      <td><div class="action-cell">
+        <button class="btn-edit" onclick="showGearEdit(${r.gear_id})">EDIT</button>
+        <button class="btn-del" onclick="triggerDelete('gears',${r.gear_id},'${r.gear_name}')">DELETE</button>
+      </div></td>
+    </tr>`).join('');
+  makePagination('gears',data.length,p,(pp)=>pages.gears=pp,renderGears);
+}
+
+function showGearEdit(id){
+  const r=DB.gears.find(r=>r.gear_id===id);
+  editState={table:'gears',id};
+  document.getElementById('modal-edit-title').textContent='✏️ EDIT GEAR';
+  const playerOpts=DB.players.map(p=>`<option value="${p.player_id}"${p.player_id===r.player_id?' selected':''}>${p.player_name}</option>`).join('');
+  const typeOpts=['Headset','Mouse','Keyboard'].map(t=>`<option${t===r.gear_type?' selected':''}>${t}</option>`).join('');
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">GEAR NAME</label><input class="form-input" id="edit-gear_name" value="${r.gear_name}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">PLAYER</label><select class="form-input" id="edit-player_id">${playerOpts}</select></div>
+      <div class="form-group"><label class="form-label">TYPE</label><select class="form-input" id="edit-gear_type">${typeOpts}</select></div>
+    </div>
+    <div class="form-group"><label class="form-label">BRAND</label><input class="form-input" id="edit-brand" value="${r.brand}"></div>
+  `;
+  openModal('modal-edit');
+}
+
+function addGear(){
+  const name=document.getElementById('g-name').value.trim();
+  if(!name){showToast('Gear name is required','error');return;}
+  DB.gears.push({gear_id:DB.nextId.gears++,player_id:parseInt(document.getElementById('g-player').value),gear_name:name,gear_type:document.getElementById('g-type').value,brand:document.getElementById('g-brand').value.trim()});
+  document.getElementById('g-name').value='';document.getElementById('g-brand').value='';
+  renderGears(); updateCounts(); showToast('Gear added!');
+}
+
+// ===== RENDER TOURNAMENTS =====
+function renderTournaments(){
+  const q=(document.getElementById('search-tournaments').value||'').toLowerCase();
+  let data=DB.tournaments.filter(r=>r.tournament_name.toLowerCase().includes(q)||r.location.toLowerCase().includes(q));
+  const p=pages.tournaments;
+  const slice=data.slice((p-1)*perPage,p*perPage);
+  document.getElementById('tournaments-tbody').innerHTML=slice.map(r=>`
+    <tr>
+      <td class="id-badge">${r.tournament_id}</td>
+      <td><strong>${r.tournament_name}</strong></td>
+      <td>${r.location}</td>
+      <td class="prize-amount">${fmtPrize(r.prize_pool)}</td>
+      <td><div class="action-cell">
+        <button class="btn-details" onclick="showTournamentDetails(${r.tournament_id})">DETAILS</button>
+        <button class="btn-edit" onclick="showTournamentEdit(${r.tournament_id})">EDIT</button>
+        <button class="btn-del" onclick="triggerDelete('tournaments',${r.tournament_id},'${r.tournament_name}')">DELETE</button>
+      </div></td>
+    </tr>`).join('');
+  makePagination('tournaments',data.length,p,(pp)=>pages.tournaments=pp,renderTournaments);
+}
+
+function showTournamentDetails(id){
+  const r=DB.tournaments.find(r=>r.tournament_id===id);
+  const matches=DB.match_results.filter(m=>m.tournament_id===id);
+  document.getElementById('modal-details-title').textContent=`🏆 ${r.tournament_name}`;
+  document.getElementById('modal-details-body').innerHTML=`
+    <div class="modal-detail-row"><span class="detail-key">ID</span><span class="detail-val">#${r.tournament_id}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">LOCATION</span><span class="detail-val">📍 ${r.location}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">PRIZE POOL</span><span class="detail-val prize-amount">${fmtPrize(r.prize_pool)}</span></div>
+    <div class="modal-detail-row"><span class="detail-key">MATCHES</span><span class="detail-val">${matches.length} matches</span></div>
+    <div class="modal-detail-row"><span class="detail-key">TEAMS</span><span class="detail-val">${matches.map(m=>teamName(m.team_id)).join(', ')||'None'}</span></div>
+  `;
+  openModal('modal-details');
+}
+
+function showTournamentEdit(id){
+  const r=DB.tournaments.find(r=>r.tournament_id===id);
+  editState={table:'tournaments',id};
+  document.getElementById('modal-edit-title').textContent='✏️ EDIT TOURNAMENT';
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">TOURNAMENT NAME</label><input class="form-input" id="edit-tournament_name" value="${r.tournament_name}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">LOCATION</label><input class="form-input" id="edit-location" value="${r.location}"></div>
+      <div class="form-group"><label class="form-label">PRIZE POOL ($)</label><input class="form-input" id="edit-prize_pool" type="number" value="${r.prize_pool}"></div>
+    </div>
+  `;
+  openModal('modal-edit');
+}
+
+function addTournament(){
+  const name=document.getElementById('t-name').value.trim();
+  if(!name){showToast('Tournament name is required','error');return;}
+  DB.tournaments.push({tournament_id:DB.nextId.tournaments++,tournament_name:name,location:document.getElementById('t-location').value.trim(),prize_pool:parseFloat(document.getElementById('t-prize').value)||0});
+  document.getElementById('t-name').value='';document.getElementById('t-location').value='';document.getElementById('t-prize').value='';
+  renderTournaments(); updateCounts(); showToast('Tournament added!');
+}
+
+// ===== RENDER MATCHES =====
+function populateMatchSelects(){
+  document.getElementById('m-tournament').innerHTML=DB.tournaments.map(t=>`<option value="${t.tournament_id}">${t.tournament_name}</option>`).join('');
+  document.getElementById('m-team').innerHTML=DB.teams.map(t=>`<option value="${t.team_id}">${t.team_name}</option>`).join('');
+}
+function renderMatches(){
+  const q=(document.getElementById('search-matches').value||'').toLowerCase();
+  let data=DB.match_results.filter(r=>teamName(r.team_id).toLowerCase().includes(q)||tournamentName(r.tournament_id).toLowerCase().includes(q)||r.result.toLowerCase().includes(q));
+  const p=pages.matches;
+  const slice=data.slice((p-1)*perPage,p*perPage);
+  document.getElementById('matches-tbody').innerHTML=slice.map(r=>`
+    <tr>
+      <td class="id-badge">${r.result_id}</td>
+      <td>${tournamentName(r.tournament_id)}</td>
+      <td><strong>${teamName(r.team_id)}</strong></td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:12px">${r.match_date}</td>
+      <td><span class="result-${r.result.toLowerCase()}">${r.result==='Win'?'✅':'❌'} ${r.result.toUpperCase()}</span></td>
+      <td><div class="action-cell">
+        <button class="btn-edit" onclick="showMatchEdit(${r.result_id})">EDIT</button>
+        <button class="btn-del" onclick="triggerDelete('matches',${r.result_id},'Match #${r.result_id}')">DELETE</button>
+      </div></td>
+    </tr>`).join('');
+  makePagination('matches',data.length,p,(pp)=>pages.matches=pp,renderMatches);
+}
+
+function showMatchEdit(id){
+  const r=DB.match_results.find(r=>r.result_id===id);
+  editState={table:'matches',id};
+  document.getElementById('modal-edit-title').textContent='✏️ EDIT MATCH RESULT';
+  const tOpts=DB.tournaments.map(t=>`<option value="${t.tournament_id}"${t.tournament_id===r.tournament_id?' selected':''}>${t.tournament_name}</option>`).join('');
+  const tmOpts=DB.teams.map(t=>`<option value="${t.team_id}"${t.team_id===r.team_id?' selected':''}>${t.team_name}</option>`).join('');
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">TOURNAMENT</label><select class="form-input" id="edit-tournament_id">${tOpts}</select></div>
+    <div class="form-group"><label class="form-label">TEAM</label><select class="form-input" id="edit-team_id2">${tmOpts}</select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">DATE</label><input class="form-input" id="edit-match_date" type="date" value="${r.match_date}"></div>
+      <div class="form-group"><label class="form-label">RESULT</label><select class="form-input" id="edit-result"><option${r.result==='Win'?' selected':''}>Win</option><option${r.result==='Lose'?' selected':''}>Lose</option></select></div>
+    </div>
+  `;
+  openModal('modal-edit');
+}
+
+function addMatch(){
+  DB.match_results.push({result_id:DB.nextId.matches++,tournament_id:parseInt(document.getElementById('m-tournament').value),team_id:parseInt(document.getElementById('m-team').value),match_date:document.getElementById('m-date').value,result:document.getElementById('m-result').value});
+  renderMatches(); updateCounts(); showToast('Match result added!');
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  // Recent teams
+  document.getElementById('dash-teams').innerHTML=DB.teams.slice(0,5).map(r=>`
+    <tr><td class="id-badge">${r.team_id}</td><td>${r.team_name}</td><td>${flag(r.country)} ${r.country}</td></tr>`).join('');
+  // Recent matches
+  document.getElementById('dash-matches').innerHTML=DB.match_results.slice(0,5).map(r=>`
+    <tr><td>${teamName(r.team_id)}</td><td style="font-size:11px">${tournamentName(r.tournament_id)}</td><td><span class="result-${r.result.toLowerCase()}">${r.result==='Win'?'✅':'❌'} ${r.result}</span></td></tr>`).join('');
+  // Top tournaments
+  const sorted=[...DB.tournaments].sort((a,b)=>b.prize_pool-a.prize_pool);
+  document.getElementById('dash-tournaments').innerHTML=sorted.slice(0,5).map(r=>`
+    <tr><td>${r.tournament_name}</td><td class="prize-amount">${fmtPrize(r.prize_pool)}</td></tr>`).join('');
+  // Players
+  document.getElementById('dash-players').innerHTML=DB.players.slice(0,5).map(r=>`
+    <tr><td>${r.player_name}</td><td><span class="role-badge role-${r.game_role}">${r.game_role}</span></td><td>${teamName(r.team_id)}</td></tr>`).join('');
+}
+
+// ===== REPORT =====
+function renderReport(){
+  // --- Summary Cards ---
+  const totalMatches = DB.match_results.length;
+  const totalWins = DB.match_results.filter(m=>m.result==='Win').length;
+  const totalLosses = totalMatches - totalWins;
+  const overallWinRate = totalMatches ? Math.round(totalWins/totalMatches*100) : 0;
+
+  document.getElementById('summary-text').innerHTML = `
+    <div class="summary-big" style="color:var(--accent-cyan)">${totalMatches}</div>
+    <div class="summary-label">Total Matches Played</div>
+    <div class="summary-sub">✅ ${totalWins} Wins &nbsp;|&nbsp; ❌ ${totalLosses} Losses</div>
+    <div class="summary-sub" style="color:var(--accent-green);margin-top:8px">Overall Win Rate: ${overallWinRate}%</div>
+  `;
+
+  // Best performer (team with highest win rate, at least 1 match)
+  let bestTeam = null, bestRate = -1;
+  DB.teams.forEach(t => {
+    const tm = DB.match_results.filter(m=>m.team_id===t.team_id);
+    if(!tm.length) return;
+    const wr = tm.filter(m=>m.result==='Win').length / tm.length;
+    if(wr > bestRate){ bestRate=wr; bestTeam=t; }
+  });
+  if(bestTeam){
+    const tm = DB.match_results.filter(m=>m.team_id===bestTeam.team_id);
+    document.getElementById('top-team').innerHTML = `
+      <div class="summary-big" style="color:var(--accent-gold)">🏅 ${bestTeam.team_name}</div>
+      <div class="summary-label">${flag(bestTeam.country)} ${bestTeam.country}</div>
+      <div class="summary-sub">Win Rate: ${Math.round(bestRate*100)}% (${tm.filter(m=>m.result==='Win').length}/${tm.length} matches)</div>
+      <div class="summary-sub">Coach: ${bestTeam.coach_name}</div>
+    `;
+  } else {
+    document.getElementById('top-team').innerHTML = '<div class="summary-label">No match data yet</div>';
+  }
+
+  // Top Tournament
+  const topTournament = [...DB.tournaments].sort((a,b)=>b.prize_pool-a.prize_pool)[0];
+  if(topTournament){
+    document.getElementById('top-tournament').innerHTML = `
+      <div class="summary-big" style="color:var(--accent-gold)">${fmtPrize(topTournament.prize_pool)}</div>
+      <div class="summary-label">${topTournament.tournament_name}</div>
+      <div class="summary-sub">📍 ${topTournament.location}</div>
+    `;
+  }
+
+  // Match Outcomes
+  document.getElementById('result-overview').innerHTML = `
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px">
+      <div style="flex:1">
+        <div class="summary-big" style="color:var(--accent-green)">${totalWins}</div>
+        <div class="summary-label">WINS</div>
+      </div>
+      <div style="flex:1">
+        <div class="summary-big" style="color:var(--accent-red)">${totalLosses}</div>
+        <div class="summary-label">LOSSES</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border-radius:4px;height:8px;overflow:hidden">
+      <div style="height:100%;width:${overallWinRate}%;background:linear-gradient(90deg,var(--accent-green),#00cc6a);border-radius:4px;transition:width 0.8s ease"></div>
+    </div>
+    <div class="summary-sub" style="margin-top:6px">${overallWinRate}% Win Rate across ${totalMatches} matches</div>
+  `;
+
+  // Win rate chart
+  const wc=document.getElementById('winrate-chart'); wc.innerHTML='';
+  DB.teams.forEach(t=>{
+    const wins=DB.match_results.filter(m=>m.team_id===t.team_id&&m.result==='Win').length;
+    const total=DB.match_results.filter(m=>m.team_id===t.team_id).length;
+    const pct=total?Math.round(wins/total*100):0;
+    wc.innerHTML+=`<div class="winrate-bar">
+      <div class="winrate-label">${t.team_name}</div>
+      <div class="bar-track"><div class="bar-fill win" style="width:${pct}%"></div></div>
+      <div class="bar-pct" style="color:var(--accent-green)">${pct}%</div>
+    </div>`;
+  });
+
+  // Prize chart
+  const pc=document.getElementById('prize-chart'); pc.innerHTML='';
+  const maxP=Math.max(...DB.tournaments.map(t=>t.prize_pool));
+  [...DB.tournaments].sort((a,b)=>b.prize_pool-a.prize_pool).slice(0,6).forEach(t=>{
+    const pct=Math.round(t.prize_pool/maxP*100);
+    pc.innerHTML+=`<div class="winrate-bar">
+      <div class="winrate-label">${t.tournament_name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--accent-gold),#e0a800)"></div></div>
+      <div class="bar-pct" style="color:var(--accent-gold)">$${(t.prize_pool/1000).toFixed(0)}K</div>
+    </div>`;
+  });
+
+  // Role chart
+  const rc=document.getElementById('role-chart'); rc.innerHTML='';
+  const roles={};
+  DB.players.forEach(p=>roles[p.game_role]=(roles[p.game_role]||0)+1);
+  const maxR=Math.max(...Object.values(roles));
+  const roleColors={Sniper:'var(--accent-red)',Support:'var(--accent-cyan)',Leader:'var(--accent-gold)',Attacker:'var(--accent-purple)',Defender:'var(--accent-green)'};
+  Object.entries(roles).forEach(([role,cnt])=>{
+    const pct=Math.round(cnt/maxR*100);
+    rc.innerHTML+=`<div class="winrate-bar">
+      <div class="winrate-label"><span class="role-badge role-${role}">${role}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${roleColors[role]}"></div></div>
+      <div class="bar-pct" style="color:${roleColors[role]}">${cnt}</div>
+    </div>`;
+  });
+
+  // JOIN view 1: player+team+gear
+  document.getElementById('join-tbody').innerHTML=DB.players.map(p=>{
+    const team=DB.teams.find(t=>t.team_id===p.team_id)||{};
+    const gear=DB.gears.find(g=>g.player_id===p.player_id)||{gear_name:'—',gear_type:'—',brand:'—'};
+    return `<tr>
+      <td><strong>${p.player_name}</strong></td>
+      <td><span class="role-badge role-${p.game_role}">${p.game_role}</span></td>
+      <td>${p.age}</td>
+      <td>${team.team_name||'—'}</td>
+      <td>${flag(team.country||'')} ${team.country||'—'}</td>
+      <td>${gear.gear_name}</td>
+      <td><span class="gear-badge gear-${gear.gear_type}">${gear.gear_type}</span></td>
+      <td>${gear.brand}</td>
+    </tr>`;
+  }).join('');
+
+  // JOIN view 2: match+team+tournament
+  document.getElementById('join-match-tbody').innerHTML=DB.match_results.map(m=>{
+    const team=DB.teams.find(t=>t.team_id===m.team_id)||{};
+    const tour=DB.tournaments.find(t=>t.tournament_id===m.tournament_id)||{};
+    return `<tr>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:11px">${m.match_date}</td>
+      <td><strong>${team.team_name||'—'}</strong></td>
+      <td>${flag(team.country||'')} ${team.country||'—'}</td>
+      <td>${tour.tournament_name||'—'}</td>
+      <td>📍 ${tour.location||'—'}</td>
+      <td class="prize-amount">${tour.prize_pool?fmtPrize(tour.prize_pool):'—'}</td>
+      <td><span class="result-${m.result.toLowerCase()}">${m.result==='Win'?'✅':'❌'} ${m.result}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== COUNTS =====
+function updateCounts(){
+  document.getElementById('cnt-teams').textContent=DB.teams.length;
+  document.getElementById('cnt-players').textContent=DB.players.length;
+  document.getElementById('cnt-gears').textContent=DB.gears.length;
+  document.getElementById('cnt-tournaments').textContent=DB.tournaments.length;
+  document.getElementById('cnt-matches').textContent=DB.match_results.length;
+}
+
+function renderAll(){
+  const tab=document.querySelector('.tab-section.active').id.replace('tab-','');
+  if(tab==='teams') renderTeams();
+  if(tab==='players') renderPlayers();
+  if(tab==='gears') renderGears();
+  if(tab==='tournaments') renderTournaments();
+  if(tab==='matchresults') renderMatches();
+  if(tab==='report') renderReport();
+  if(tab==='dashboard') renderDashboard();
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+
+// ===== INIT =====
+renderDashboard();
+updateCounts();
+</script>
+</body>
+</html>

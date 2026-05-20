@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customized Data Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #445b79; color: #e2e8f0; font-family: 'Prompt', sans-serif; }
+        .card { background-color: #5c708f; border: 1px solid #5c708f; border-radius: 8px; }
+        .btn-back { border-color: #ff0055; color: #ff0055; }
+        .detail-label { color: #a8d68c; }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="card p-4">
+            <h1 class="fw-bold mb-3">Customized Data Detail</h1>
+            <p class="text-secondary mb-4">Item type: <strong>{{ item_type.title() }}</strong></p>
+            <form action="{{ url_for('update_custom_data') }}" method="POST">
+                <input type="hidden" name="item_type" value="{{ item_type }}">
+                <input type="hidden" name="item_id" value="{{ row[item_type + '_id'] if item_type != 'player' else row['player_id'] }}">
+                <div class="row g-3">
+                    {% if item_type == 'team' %}
+                        <div class="col-12">
+                            <label class="form-label detail-label">Team Name</label>
+                            <input type="text" name="team_name" class="form-control" value="{{ row['team_name'] }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Coach</label>
+                            <input type="text" name="coach_name" class="form-control" value="{{ row['coach_name'] or '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Country</label>
+                            <input type="text" name="country" class="form-control" value="{{ row['country'] or '' }}">
+                        </div>
+                    {% elif item_type == 'player' %}
+                        <div class="col-12">
+                            <label class="form-label detail-label">Player Name</label>
+                            <input type="text" name="player_name" class="form-control" value="{{ row['player_name'] }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Team</label>
+                            <select name="team_id" class="form-select">
+                                <option value="">Free Agent</option>
+                                {% for team in teams %}
+                                    <option value="{{ team['team_id'] }}" {% if row['team_id'] == team['team_id'] %}selected{% endif %}>{{ team['team_name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label detail-label">Role</label>
+                            <input type="text" name="game_role" class="form-control" value="{{ row['game_role'] or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label detail-label">Age</label>
+                            <input type="number" name="age" class="form-control" value="{{ row['age'] or '' }}">
+                        </div>
+                    {% elif item_type == 'tournament' %}
+                        <div class="col-12">
+                            <label class="form-label detail-label">Tournament Name</label>
+                            <input type="text" name="tournament_name" class="form-control" value="{{ row['tournament_name'] }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Location</label>
+                            <input type="text" name="location" class="form-control" value="{{ row['location'] or '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Prize Pool</label>
+                            <input type="number" step="0.01" name="prize_pool" class="form-control" value="{{ row['prize_pool'] }}">
+                        </div>
+                    {% elif item_type == 'result' %}
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Event</label>
+                            <select name="tournament_id" class="form-select" required>
+                                {% for event in tournaments %}
+                                    <option value="{{ event['tournament_id'] }}" {% if row['tournament_id'] == event['tournament_id'] %}selected{% endif %}>{{ event['tournament_name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Team</label>
+                            <select name="team_id" class="form-select" required>
+                                {% for team in teams %}
+                                    <option value="{{ team['team_id'] }}" {% if row['team_id'] == team['team_id'] %}selected{% endif %}>{{ team['team_name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Match Date</label>
+                            <input type="date" name="match_date" class="form-control" value="{{ row['match_date'] }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label detail-label">Result</label>
+                            <select name="result" class="form-select" required>
+                                <option value="Win" {% if row['result'] == 'Win' %}selected{% endif %}>Win</option>
+                                <option value="Lose" {% if row['result'] == 'Lose' %}selected{% endif %}>Lose</option>
+                            </select>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-outline-light">Save Changes</button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-light">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
